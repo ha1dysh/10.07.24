@@ -14,7 +14,7 @@ const data2 = [
 	{ "varyLoooongIDFieldName": 10, "extremelyLooooooooooooongActiveFiedName": true }
 ]
 
-function compress<T extends Record<string, unknown>>(data: T[]) {
+function compress<T extends Record<string, unknown>>(data: T[]): [string[], [number, unknown][]] {
 	const res: [string[], [number, unknown][]] = [Object.keys(data[0]), []]
 
 	for (let i = 0; i < data.length; i++) {
@@ -30,7 +30,7 @@ function compress<T extends Record<string, unknown>>(data: T[]) {
 		keyIndex = 0
 	}
 
-	return console.log(res);
+	return  res;
 }
 
 console.log(compress(data2));

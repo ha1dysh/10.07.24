@@ -51,8 +51,9 @@ let testData4 = [
 //    Синтаксис: array_normalize(arr: array, shema: string|Object[, transform: bool = false]): any[]
 
 type Schema = 'string' | 'number' | 'int' | 'float' | 'bool' | 'function' | 'array' | { [key: string]: Schema };
+type Result = number | string | boolean | unknown[] | Function | { [key: string]: Result };
 
-function arrayNormalize(arr: unknown[], scheme: Schema, transform: boolean = false) {
+function arrayNormalize(arr: unknown[], scheme: Schema, transform: boolean = false): Result[] {
   if (scheme === "string") {
     return normalizeString(arr, transform);
   }
@@ -80,7 +81,11 @@ function arrayNormalize(arr: unknown[], scheme: Schema, transform: boolean = fal
   return [];
 }
 
-function normalizeString(arr: unknown[], transform: boolean = false) {
+function isString(str: unknown): str is string {
+  return typeof str === "string"
+}
+
+function normalizeString(arr: unknown[], transform: boolean = false): string[] {
   if (transform) {
     arr = arr.map((el) => {
       if (typeof el === "number" || typeof el === "string") {
@@ -88,10 +93,10 @@ function normalizeString(arr: unknown[], transform: boolean = false) {
       }
     });
   }
-  return arr.filter((el) => typeof el === "string");
+  return arr.filter(isString);
 }
 
-function normalizeNumber(arr: unknown[], transform: boolean = false) {
+function normalizeNumber(arr: unknown[], transform: boolean = false): number[] {
   if (transform) {
     arr = arr.map((el) => {
       const numberValue = Number(el);
@@ -100,28 +105,28 @@ function normalizeNumber(arr: unknown[], transform: boolean = false) {
       }
     });
   }
-  return arr.filter((el) => typeof el === "number");
+  return arr.filter((el) => typeof el === "number") as number[];
 }
 
-function normalizeInt(arr: unknown[], transform: boolean = false) {
+function normalizeInt(arr: unknown[], transform: boolean = false): number[] {
   if (transform) {
     arr = arr.map((el) => parseInt(String(el)));
   }
-  return arr.filter((el) => typeof el === "number" && Number.isInteger(el));
+  return arr.filter((el) => typeof el === "number" && Number.isInteger(el)) as number[];;
 }
 
-function normalizeFloat(arr: unknown[], transform: boolean = false) {
+function normalizeFloat(arr: unknown[], transform: boolean = false): number[] {
   if (transform) {
     return (arr = arr.map((el) => parseFloat(String(el))));
   }
-  return arr.filter((el) => typeof el === "number" && !Number.isInteger(el));
+  return arr.filter((el) => typeof el === "number" && !Number.isInteger(el)) as number[];;
 }
 
-function normalizeBool(arr: unknown[], transform: boolean = false) {
+function normalizeBool(arr: unknown[], transform: boolean = false): boolean[] {
   if (transform) {
     arr = arr.map((el) => Boolean(el));
   }
-  return arr.filter((el) => typeof el === "boolean");
+  return arr.filter((el) => typeof el === "boolean") as boolean[];
 }
 
 function normalizeArray(arr: unknown[], transform: boolean = false) {
@@ -131,24 +136,24 @@ function normalizeArray(arr: unknown[], transform: boolean = false) {
   return arr.filter((el): el is unknown[] => Array.isArray(el));
 }
 
-function normalizeFunction(arr: unknown[], transform: boolean = false) {
+function normalizeFunction(arr: unknown[], transform: boolean = false): Function[] {
   if (transform) {
     arr = arr.map((el) => new Function(String(el)));
   }
-  return arr.filter((el) => el instanceof Function);
+  return arr.filter((el) => el instanceof Function) as Function[];
 }
 
-function normalizeObject(arr: unknown[], scheme: { [key: string]: Schema }, transform: boolean = false) {
-  const arrOfNormalizedObject = [];
+function normalizeObject(arr: unknown[], scheme: Record<string, Schema>, transform: boolean = false) {
+  const arrOfNormalizedObject: Record<string, Result>[] = [];
 
-  const arrOfObj = arr.filter((el) => typeof el === "object" && el !== null);
+  const arrOfObj = arr.filter((el) => typeof el === "object" && el !== null) as object[];
 
   for (const obj of arrOfObj) {
-    const normalizedObject: Record<string, unknown> = {};
+    const normalizedObject: Record<string, Result> = {};
 
     for (const key in scheme) {
       if (obj.hasOwnProperty(key)) {
-        const value = (obj as Record<string, unknown>)[key];
+        const value = obj[key];
         const resultOfNormalizeValues = arrayNormalize(
           [value],
           scheme[key],
@@ -177,4 +182,4 @@ let result4 = arrayNormalize(testData4, { age: "int" }, true); // [{age: 20}, {a
 console.log(result);
 console.log(result2);
 console.log(result3);
-console.log(result4);
+console.log(result4[0]);

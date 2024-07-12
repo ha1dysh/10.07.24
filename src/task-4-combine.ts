@@ -4,8 +4,9 @@ let testData = [1, 2, 1990, 85, 24, 'Vasya', 'colya@example.com', 'Rafshan', 'as
 let testData2 = [1, 2, 1990, 85, 24, 5, 7, 8.1];
 
 type TArray = (number | string | boolean)[]
+type CombinedObject = Record<string, number | string | boolean | undefined>
 
-function arrayCombine(arr1: TArray, arr2: TArray) {
+function arrayCombine(arr1: TArray, arr2: TArray): CombinedObject {
   return arr1.reduce((acc, cur, i) => {
     if (typeof cur === 'string' || Number.isInteger(cur)) {
       return { ...acc, [cur as string]: arr2[i] };
